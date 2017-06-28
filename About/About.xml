@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+	<ModMetaData>
+		<name>Save Storage Settings</name>
+		<author>Kiame Vivacity</author>
+		<url></url>
+		<targetVersion>0.17.1557</targetVersion>
+		<description>Save and Load Dump and Stockpile Zone settings. These saves can be carried over from new games to old saves.
+		
+Currently only supports Dump Stockpile and Stockpile Zones.
+
+Future Plans: Add support for other types of Storage Zones.
+		</description>
+	</ModMetaData>
