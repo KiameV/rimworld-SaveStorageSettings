@@ -319,10 +319,10 @@ namespace SaveStorageSettings
             sw.Write(sb.ToString());
         }
 
-        public static bool TryGetSaveFileInto(string filename, out SaveFileInfo sfi)
+        public static bool TryGetSaveFileInto(SaveTypeEnum saveType, string filename, out SaveFileInfo sfi)
         {
             FileInfo fi;
-            if (TryGetFileInfo(filename, out fi))
+            if (TryGetFileInfo(saveType, filename, out fi))
             {
                 sfi = new SaveFileInfo(fi);
                 return true;
@@ -331,10 +331,10 @@ namespace SaveStorageSettings
             return false;
         }
 
-        public static bool TryGetFileInfo(string fileName, out FileInfo fi)
+        public static bool TryGetFileInfo(SaveTypeEnum saveType, string fileName, out FileInfo fi)
         {
             string path;
-            if (TryGetDirectoryPath(out path))
+            if (TryGetDirectoryPath(saveType, out path))
             {
                 fi = new FileInfo(Path.Combine(path, fileName.ToString() + ".txt"));
                 return true;
@@ -343,9 +343,9 @@ namespace SaveStorageSettings
             return false;
         }
 
-        public static bool TryGetDirectoryPath(out string path)
+        public static bool TryGetDirectoryPath(SaveTypeEnum saveType, out string path)
         {
-            if (TryGetDirectoryName(out path))
+            if (TryGetDirectoryName(saveType, out path))
             {
                 DirectoryInfo directoryInfo = new DirectoryInfo(path);
                 if (!directoryInfo.Exists)
@@ -357,13 +357,13 @@ namespace SaveStorageSettings
             return false;
         }
 
-        private static bool TryGetDirectoryName(out string path)
+        private static bool TryGetDirectoryName(SaveTypeEnum saveType, out string path)
         {
             try
             {
                 path = (string)typeof(GenFilePaths).GetMethod("FolderUnderSaveData", BindingFlags.Static | BindingFlags.NonPublic).Invoke(null, new object[]
                 {
-                    "SaveStorageSettings/Zone_Stockpile"
+                    "SaveStorageSettings/" + saveType.ToString()
                 });
                 return true;
             }

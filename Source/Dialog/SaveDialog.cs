@@ -6,11 +6,17 @@ namespace SaveStorageSettings.Dialog
 {
     class SaveDialog : FileListDialog
     {
-        private readonly Zone_Stockpile zone;
+        private readonly ThingFilter ThingFilter;
 
-        internal SaveDialog(Zone_Stockpile zone)
+        internal SaveDialog(Zone_Stockpile zone) : base(SaveTypeEnum.Zone_Stockpile)
         {
-            this.zone = zone;
+            this.ThingFilter = zone.settings.filter;
+            this.interactButLabel = "OverwriteButton".Translate();
+        }
+
+        internal SaveDialog(Outfit outfit) : base(SaveTypeEnum.Apparel_Management)
+        {
+            this.ThingFilter = outfit.filter;
             this.interactButLabel = "OverwriteButton".Translate();
         }
 
@@ -24,7 +30,7 @@ namespace SaveStorageSettings.Dialog
 
         protected override void DoFileInteraction(FileInfo fi)
         {
-            IOUtil.SaveStorageSettings(this.zone.settings.filter, fi);
+            IOUtil.SaveStorageSettings(this.ThingFilter, fi);
             base.Close();
         }
     }
