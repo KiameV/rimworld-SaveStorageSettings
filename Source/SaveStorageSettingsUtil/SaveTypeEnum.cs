@@ -1,5 +1,4 @@
-﻿
-namespace SaveStorageSettings
+﻿namespace SaveStorageSettingsUtil
 {
     public enum SaveTypeEnum
     {

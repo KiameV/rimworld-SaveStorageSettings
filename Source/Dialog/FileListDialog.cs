@@ -46,7 +46,7 @@ namespace RimWorld
 
         public static readonly Color UnimportantTextColor = new Color(1f, 1f, 1f, 0.5f);
 
-        private readonly SaveTypeEnum SaveType;
+        private readonly string StorageTypeName;
 
         public override Vector2 InitialSize
         {
@@ -64,9 +64,9 @@ namespace RimWorld
             }
         }
 
-        public FileListDialog(SaveTypeEnum saveType)
+        public FileListDialog(string storageTypeName)
         {
-            this.SaveType = saveType;
+            this.StorageTypeName = storageTypeName;
 
             this.closeOnEscapeKey = true;
             this.doCloseButton = true;
@@ -146,7 +146,7 @@ namespace RimWorld
         protected void ReloadFiles()
         {
             string path;
-            IOUtil.TryGetDirectoryPath(this.SaveType, out path);
+            IOUtil.TryGetDirectoryPath(this.StorageTypeName, out path);
 
             this.files.Clear();
             foreach (string file in Directory.GetFiles(path))
@@ -191,7 +191,7 @@ namespace RimWorld
                 else
                 {
                     FileInfo fi;
-                    IOUtil.TryGetFileInfo(this.SaveType, this.typingName, out fi);
+                    IOUtil.TryGetFileInfo(this.StorageTypeName, this.typingName, out fi);
                     this.DoFileInteraction(fi);
                 }
             }

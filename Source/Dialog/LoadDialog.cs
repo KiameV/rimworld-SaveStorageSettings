@@ -8,15 +8,9 @@ namespace SaveStorageSettings.Dialog
     {
         private readonly ThingFilter ThingFilter;
 
-        internal LoadDialog(Zone_Stockpile zone) : base(SaveTypeEnum.Zone_Stockpile)
+        internal LoadDialog(string storageTypeName, ThingFilter thingFilter) : base(storageTypeName)
         {
-            this.ThingFilter = zone.settings.filter;
-            this.interactButLabel = "LoadGameButton".Translate();
-        }
-
-        internal LoadDialog(Outfit outfit) : base(SaveTypeEnum.Apparel_Management)
-        {
-            this.ThingFilter = outfit.filter;
+            this.ThingFilter = thingFilter;
             this.interactButLabel = "LoadGameButton".Translate();
         }
 

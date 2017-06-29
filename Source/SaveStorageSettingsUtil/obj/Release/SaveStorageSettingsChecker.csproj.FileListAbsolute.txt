@@ -1,0 +1,3 @@
+C:\Users\Travisty\Documents\Visual Studio 2017\Projects\RimWorld\SaveStorageSettings\SaveStorageSettingsChecker\obj\Release\SaveStorageSettingsChecker.dll
+C:\Users\Travisty\Documents\Visual Studio 2017\Projects\RimWorld\SaveStorageSettings\SaveStorageSettingsChecker.dll
+C:\Users\Travisty\Documents\Visual Studio 2017\Projects\RimWorld\SaveStorageSettings\SaveStorageSettingsChecker\obj\Release\SaveStorageSettingsChecker.csprojResolveAssemblyReference.cache

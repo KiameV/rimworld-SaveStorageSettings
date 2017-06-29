@@ -8,15 +8,9 @@ namespace SaveStorageSettings.Dialog
     {
         private readonly ThingFilter ThingFilter;
 
-        internal SaveDialog(Zone_Stockpile zone) : base(SaveTypeEnum.Zone_Stockpile)
+        internal SaveDialog(string storageTypeName, ThingFilter thingFilter) : base(storageTypeName)
         {
-            this.ThingFilter = zone.settings.filter;
-            this.interactButLabel = "OverwriteButton".Translate();
-        }
-
-        internal SaveDialog(Outfit outfit) : base(SaveTypeEnum.Apparel_Management)
-        {
-            this.ThingFilter = outfit.filter;
+            this.ThingFilter = thingFilter;
             this.interactButLabel = "OverwriteButton".Translate();
         }
 
