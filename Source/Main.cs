@@ -12,19 +12,21 @@ namespace SaveStorageSettings
     [StaticConstructorOnStartup]
     class Main
     {
-        public static readonly Texture2D DeleteX;
+        public static readonly Texture2D DeleteXTexture;
+        public static readonly Texture2D SaveTexture;
+        public static readonly Texture2D LoadTexture;
 
         static Main()
         {
             var harmony = HarmonyInstance.Create("com.savestoragesettings.rimworld.mod");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-            Log.Message("SaveStorageSettings: Adding Harmony Postfix to Zone_Stockpile.GetGizmos(Pawn)");
+            Log.Message("SaveStorageSettings: Adding Harmony Postfix to Zone_Stockpile.GetGizmos(IEnumerable<Gizmo>)");
             Log.Message("SaveStorageSettings: Adding Harmony Postfix to Dialog_ManageOutfits.DoWindowContents(Rect)");
-            
-            DeleteX = ContentFinder<Texture2D>.Get("UI/Buttons/Delete", true);
 
-            new GameObject("SaveStorageSettings_Loaded");
+            DeleteXTexture = ContentFinder<Texture2D>.Get("UI/Buttons/Delete", true);
+            SaveTexture = ContentFinder<Texture2D>.Get("UI/save", true);
+            LoadTexture = ContentFinder<Texture2D>.Get("UI/load", true);
         }
     }
 

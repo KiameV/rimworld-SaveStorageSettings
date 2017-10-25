@@ -197,7 +197,7 @@ namespace SaveStorageSettings
         static void LogException(string msg, Exception e)
         {
             Log.Warning(msg + Environment.NewLine + e.GetType().Name + " " + e.Message + " " + e.StackTrace);
-            Messages.Message(msg, MessageSound.Negative);
+            Messages.Message(msg, MessageTypeDefOf.NegativeEvent);
         }
 
         public static bool SaveStorageSettings(ThingFilter filter, FileInfo fi)

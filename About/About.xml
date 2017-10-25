@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 	<ModMetaData>
-		<name>Save Storage &amp; Outfit Settings</name>
+		<name>Save Storage &amp; Outfit Settings - A18</name>
 		<author>Kiame Vivacity</author>
-		<url></url>
-		<targetVersion>0.17.1557</targetVersion>
+		<url>https://ludeon.com/forums/index.php?topic=34075.msg347485</url>
+		<targetVersion>0.18.1700</targetVersion>
 		<description>Save and Load Dump/Stockpile and Outfit settings. These saves can be carried over from new games to old saves.
 
 Future Plans: Add support for other types of Storage Zones.

@@ -23,7 +23,7 @@ namespace SaveStorageSettings
         public static List<Gizmo> AddSaveLoadGizmos(List<Gizmo> gizmos, string storageTypeName, ThingFilter thingFilter, int groupKey = 987767552)
         {
             Command_Action a = new Command_Action();
-            a.icon = ContentFinder<UnityEngine.Texture2D>.Get("UI/save", true);
+            a.icon = Main.SaveTexture;
             a.defaultLabel = "SaveStorageSettings.SaveZoneSettings".Translate();
             a.defaultDesc = "SaveStorageSettings.SaveZoneSettingsDesc".Translate();
             a.activateSound = SoundDef.Named("Click");
@@ -32,7 +32,7 @@ namespace SaveStorageSettings
             gizmos.Add(a);
 
             a = new Command_Action();
-            a.icon = ContentFinder<UnityEngine.Texture2D>.Get("UI/load", true);
+            a.icon = Main.LoadTexture;
             a.defaultLabel = "SaveStorageSettings.LoadZoneSettings".Translate();
             a.defaultDesc = "SaveStorageSettings.LoadZoneSettingsDesc".Translate();
             a.activateSound = SoundDef.Named("Click");
