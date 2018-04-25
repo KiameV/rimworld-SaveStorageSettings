@@ -4,3 +4,7 @@ C:\Users\Travisty\Documents\Visual Studio 2017\Projects\RimWorld\SaveStorageSett
 C:\Users\Travisty\Documents\Visual Studio 2017\Projects\RimWorld\SaveStorageSettings\Source\SaveStorageSettingsUtil\obj\Release\SaveStorageSettingsUtil.csprojResolveAssemblyReference.cache
 C:\Users\Travisty\Documents\Visual Studio 2017\Projects\RimWorld\SaveStorageSettings\Source\SaveStorageSettingsUtil\obj\Release\SaveStorageSettingsUtil.dll
 C:\Users\Travisty\Documents\Visual Studio 2017\Projects\RimWorld\SaveStorageSettings\Source\SaveStorageSettingsUtil.dll
+C:\Users\tofft\Documents\Visual Studio 2017\Projects\RimWorld\SaveStorageSettings\Source\SaveStorageSettingsUtil\obj\Release\SaveStorageSettingsUtil.csprojResolveAssemblyReference.cache
+C:\Users\tofft\Documents\Visual Studio 2017\Projects\RimWorld\SaveStorageSettings\Source\SaveStorageSettingsUtil\obj\Release\SaveStorageSettingsUtil.csproj.CoreCompileInputs.cache
+C:\Users\tofft\Documents\Visual Studio 2017\Projects\RimWorld\SaveStorageSettings\Source\SaveStorageSettingsUtil\obj\Release\SaveStorageSettingsUtil.dll
+C:\Users\tofft\Documents\Visual Studio 2017\Projects\RimWorld\SaveStorageSettings\Source\SaveStorageSettingsUtil.dll

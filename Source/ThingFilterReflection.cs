@@ -61,7 +61,9 @@ namespace SaveStorageSettings
 
         internal void SettingsChangedCallback()
         {
-            ((Action)this.GetPrivateFieldInfo("settingsChangedCallback").GetValue(this.filter))?.Invoke();
+            Action a = ((Action)this.GetPrivateFieldInfo("settingsChangedCallback").GetValue(this.filter));
+            if (a != null)
+                a.Invoke();
         }
 
         private FieldInfo GetPrivateFieldInfo(string name)
