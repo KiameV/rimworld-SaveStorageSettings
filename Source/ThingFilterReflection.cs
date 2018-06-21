@@ -20,10 +20,11 @@ namespace SaveStorageSettings
         {
             get
             {
-                return from def in DefDatabase<ThingDef>.AllDefs
-                       where def.EverStoreable
-                       select def;
-                //return (List<ThingDef>)typeof(ThingDef).GetProperty("AllStorableThingDefs", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.GetProperty).GetValue(null, null);
+                foreach (ThingDef def in DefDatabase<ThingDef>.AllDefs)
+                {
+                    if (def.EverStorable(true))
+                        yield return def;
+                }
             }
         }
 

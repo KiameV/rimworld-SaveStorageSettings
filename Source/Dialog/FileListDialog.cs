@@ -68,7 +68,7 @@ namespace RimWorld
         {
             this.StorageTypeName = storageTypeName;
 
-            this.closeOnEscapeKey = true;
+            this.closeOnClickedOutside = true;
             this.doCloseButton = true;
             this.doCloseX = true;
             this.forcePause = true;
