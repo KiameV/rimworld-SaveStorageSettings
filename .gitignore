@@ -1,5 +1,6 @@
-/obj/
-Source/obj/
+/obj
+/Source/obj
+Source/SaveStorageSettingsUtil/obj/
 /Assemblies/
 /Source/.vs/
 /Source/obj/

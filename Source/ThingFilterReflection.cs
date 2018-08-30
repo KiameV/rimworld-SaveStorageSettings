@@ -20,11 +20,9 @@ namespace SaveStorageSettings
         {
             get
             {
-                foreach (ThingDef def in DefDatabase<ThingDef>.AllDefs)
-                {
-                    if (def.EverStorable(true))
-                        yield return def;
-                }
+                return from def in DefDatabase<ThingDef>.AllDefs
+                       where def.EverStorable(true)
+                       select def;
             }
         }
 
