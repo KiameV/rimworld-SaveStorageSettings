@@ -22,23 +22,25 @@ namespace SaveStorageSettings
 
         public static List<Gizmo> AddSaveLoadGizmos(List<Gizmo> gizmos, string storageTypeName, ThingFilter thingFilter, int groupKey = 987767552)
         {
-            Command_Action a = new Command_Action();
-            a.icon = Main.SaveTexture;
-            a.defaultLabel = "SaveStorageSettings.SaveZoneSettings".Translate();
-            a.defaultDesc = "SaveStorageSettings.SaveZoneSettingsDesc".Translate();
-            a.activateSound = SoundDef.Named("Click");
-            a.action = delegate { Find.WindowStack.Add(new SaveDialog(storageTypeName, thingFilter)); };
-            a.groupKey = groupKey;
-            gizmos.Add(a);
+            gizmos.Add(new Command_Action
+            {
+                icon = HarmonyPatches.SaveTexture,
+                defaultLabel = "SaveStorageSettings.SaveZoneSettings".Translate(),
+                defaultDesc = "SaveStorageSettings.SaveZoneSettingsDesc".Translate(),
+                activateSound = SoundDef.Named("Click"),
+                action = delegate { Find.WindowStack.Add(new SaveFilterDialog(storageTypeName, thingFilter)); },
+                groupKey = groupKey
+            });
 
-            a = new Command_Action();
-            a.icon = Main.LoadTexture;
-            a.defaultLabel = "SaveStorageSettings.LoadZoneSettings".Translate();
-            a.defaultDesc = "SaveStorageSettings.LoadZoneSettingsDesc".Translate();
-            a.activateSound = SoundDef.Named("Click");
-            a.action = delegate { Find.WindowStack.Add(new LoadDialog(storageTypeName, thingFilter)); };
-            a.groupKey = groupKey + 1;
-            gizmos.Add(a);
+            gizmos.Add(new Command_Action
+            {
+                icon = HarmonyPatches.LoadTexture,
+                defaultLabel = "SaveStorageSettings.LoadZoneSettings".Translate(),
+                defaultDesc = "SaveStorageSettings.LoadZoneSettingsDesc".Translate(),
+                activateSound = SoundDef.Named("Click"),
+                action = delegate { Find.WindowStack.Add(new LoadFilterDialog(storageTypeName, thingFilter)); },
+                groupKey = groupKey + 1
+            });
 
             return gizmos;
         }

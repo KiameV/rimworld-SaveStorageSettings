@@ -119,7 +119,7 @@ namespace RimWorld
                     this.DoFileInteraction(current);
                 }
                 Rect rect5 = new Rect(num4 + vector2.x + 5f, 0f, vector2.y, vector2.y);
-                if (Widgets.ButtonImage(rect5, Main.DeleteXTexture))
+                if (Widgets.ButtonImage(rect5, HarmonyPatches.DeleteXTexture))
                 {
                     FileInfo localFile = current;
                     Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("ConfirmDelete".Translate(new object[]

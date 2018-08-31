@@ -55,7 +55,7 @@
     <Compile Include="IOUtil.cs" />
     <Compile Include="Dialog\LoadDialog.cs" />
     <Compile Include="Dialog\SaveDialog.cs" />
-    <Compile Include="Main.cs" />
+    <Compile Include="HarmonyPatches.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GizmoUtil.cs" />
     <Compile Include="ThingFilterReflection.cs" />

@@ -4,11 +4,11 @@ using Verse;
 
 namespace SaveStorageSettings.Dialog
 {
-    class SaveDialog : FileListDialog
+    class SaveFilterDialog : FileListDialog
     {
         private readonly ThingFilter ThingFilter;
 
-        internal SaveDialog(string storageTypeName, ThingFilter thingFilter) : base(storageTypeName)
+        internal SaveFilterDialog(string storageTypeName, ThingFilter thingFilter) : base(storageTypeName)
         {
             this.ThingFilter = thingFilter;
             this.interactButLabel = "OverwriteButton".Translate();
@@ -25,6 +25,31 @@ namespace SaveStorageSettings.Dialog
         protected override void DoFileInteraction(FileInfo fi)
         {
             IOUtil.SaveStorageSettings(this.ThingFilter, fi);
+            base.Close();
+        }
+    }
+
+    class SaveCraftingDialog : FileListDialog
+    {
+        private readonly BillStack BillStack;
+
+        internal SaveCraftingDialog(string type, BillStack billStack) : base(type)
+        {
+            this.BillStack = billStack;
+            this.interactButLabel = "OverwriteButton".Translate();
+        }
+
+        protected override bool ShouldDoTypeInField
+        {
+            get
+            {
+                return true;
+            }
+        }
+
+        protected override void DoFileInteraction(FileInfo fi)
+        {
+            IOUtil.SaveCraftingSettings(this.BillStack, fi);
             base.Close();
         }
     }
