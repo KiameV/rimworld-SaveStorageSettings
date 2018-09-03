@@ -83,4 +83,29 @@ namespace SaveStorageSettings.Dialog
             base.Close();
         }
     }
+
+    class LoadPolicyDialog : FileListDialog
+    {
+        private readonly DrugPolicy DrugPolicy;
+
+        internal LoadPolicyDialog(string storageTypeName, DrugPolicy drugPolicy) : base(storageTypeName)
+        {
+            this.DrugPolicy = drugPolicy;
+            this.interactButLabel = "LoadGameButton".Translate();
+        }
+
+        protected override bool ShouldDoTypeInField
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        protected override void DoFileInteraction(FileInfo fi)
+        {
+            IOUtil.LoadPolicy(this.DrugPolicy, fi);
+            base.Close();
+        }
+    }
 }

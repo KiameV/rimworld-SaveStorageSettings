@@ -125,6 +125,63 @@ namespace SaveStorageSettings
             return bills;
         }
 
+        internal static void LoadPolicy(DrugPolicy drugPolicy, FileInfo fi)
+        {
+            try
+            {
+                if (fi.Exists)
+                {
+                    // Load Data
+                    using (StreamReader sr = new StreamReader(fi.FullName))
+                    {
+                        string[] kv = null;
+                        if (sr.EndOfStream ||
+                            !ReadField(sr, out kv))
+                        {
+                            throw new Exception("Trying to read from an empty file");
+                        }
+
+                        if (kv != null && "1".Equals(kv[1]))
+                        {
+                            while (!sr.EndOfStream)
+                            {
+                                if (ReadField(sr, out kv))
+                                {
+                                    switch (kv[0])
+                                    {
+                                        case "name":
+                                            drugPolicy.label = kv[1];
+                                            break;
+                                        case "drug":
+                                            DrugPolicyEntry e;
+                                            if (TryCreateDrugPolicyEntry(sr, out e))
+                                            {
+                                                for (int i = 0; i < drugPolicy.Count; ++i)
+                                                {
+                                                    if (drugPolicy[i].drug.defName.Equals(e.drug.defName))
+                                                    {
+                                                        drugPolicy[i] = e;
+                                                    }
+                                                }
+                                            }
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            throw new Exception("Unsupported version: " + kv[1]);
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                LogException("Problem loading storage settings file '" + fi.Name + "'.", e);
+            }
+        }
+
         static void LogException(string msg, Exception e)
         {
             Log.Warning(msg + Environment.NewLine + e.GetType().Name + " " + e.Message + " " + e.StackTrace);
@@ -175,7 +232,16 @@ namespace SaveStorageSettings
                                 WriteField(sw, "skillRange", p.allowedSkillRange.ToString());
                                 WriteField(sw, "suspended", p.suspended.ToString());
                                 WriteField(sw, "ingSearchRadius", p.ingredientSearchRadius.ToString());
-                                WriteField(sw, "storeMode", p.GetStoreMode().defName);
+                                BillStoreModeDef storeMode = p.GetStoreMode();
+                                if (storeMode == BillStoreModeDefOf.SpecificStockpile)
+                                {
+                                    Log.Message(
+                                        "Saving bill [" + p.recipe.defName + 
+                                        "] store mode from [" + BillStoreModeDefOf.SpecificStockpile.ToString() + 
+                                        "] to [" + BillStoreModeDefOf.BestStockpile.ToString() + "]");
+                                    storeMode = BillStoreModeDefOf.BestStockpile;
+                                }
+                                WriteField(sw, "storeMode", storeMode.defName);
                                 WriteField(sw, "repeatMode", p.repeatMode.defName);
                                 WriteField(sw, "repeatCount", p.repeatCount.ToString());
                                 WriteField(sw, "targetCount", p.targetCount.ToString());
@@ -185,6 +251,44 @@ namespace SaveStorageSettings
                                 WriteField(sw, "ingredientFilter", "");
                                 WriteFiltersToFile(p.ingredientFilter, sw);
                             }
+                            WriteField(sw, BREAK, BREAK);
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                LogException("Problem saving storage settings file '" + fi.Name + "'.", e);
+                return false;
+            }
+            return true;
+        }
+
+        public static bool SavePolicySettings(DrugPolicy policy, FileInfo fi)
+        {
+            try
+            {
+                // Write Data
+                using (FileStream fileStream = File.Open(fi.FullName, FileMode.Create, FileAccess.Write))
+                {
+                    using (StreamWriter sw = new StreamWriter(fileStream))
+                    {
+                        WriteField(sw, "Version", "1");
+
+                        WriteField(sw, "name", policy.label);
+                        for (int i = 0; i < policy.Count; ++i)
+                        {
+                            DrugPolicyEntry e = policy[i];
+                            WriteField(sw, "drug", i.ToString());
+                            WriteField(sw, "defName", e.drug.defName);
+                            WriteField(sw, "allowedForAddiction", e.allowedForAddiction.ToString());
+                            WriteField(sw, "allowedForJoy", e.allowedForJoy.ToString());
+                            WriteField(sw, "allowScheduled", e.allowScheduled.ToString());
+                            WriteField(sw, "daysFrequency", e.daysFrequency.ToString());
+                            WriteField(sw, "onlyIfJoyBelow", e.onlyIfJoyBelow.ToString());
+                            WriteField(sw, "onlyIfMoodBelow", e.onlyIfMoodBelow.ToString());
+                            WriteField(sw, "takeToInventory", e.takeToInventory.ToString());
+                            WriteField(sw, "takeToInventoryTempBuffer", e.takeToInventoryTempBuffer);
                             WriteField(sw, BREAK, BREAK);
                         }
                     }
@@ -295,6 +399,81 @@ namespace SaveStorageSettings
                 }
                 Log.Warning(error);
                 bill = null;
+                return false;
+            }
+            return true;
+        }
+
+        private static bool TryCreateDrugPolicyEntry(StreamReader sr, out DrugPolicyEntry entry)
+        {
+            entry = null;
+            string[] kv = null;
+            try
+            {
+                while (!sr.EndOfStream)
+                {
+                    if (ReadField(sr, out kv))
+                    {
+                        switch (kv[0])
+                        {
+                            case BREAK:
+                                return true;
+                            case "defName":
+                                ThingDef def = DefDatabase<ThingDef>.GetNamed(kv[1]);
+                                if (def == null)
+                                {
+                                    Log.Warning("Unable to load drug policy with Drug of [" + kv[1] + "]");
+                                    return false;
+                                }
+                                entry = new DrugPolicyEntry();
+                                entry.drug = def;
+                                break;
+                            case "allowedForAddiction":
+                                entry.allowedForAddiction = bool.Parse(kv[1]);
+                                break;
+                            case "allowedForJoy":
+                                entry.allowedForJoy = bool.Parse(kv[1]);
+                                break;
+                            case "allowScheduled":
+                                entry.allowScheduled = bool.Parse(kv[1]);
+                                break;
+                            case "daysFrequency":
+                                entry.daysFrequency = int.Parse(kv[1]);
+                                break;
+                            case "onlyIfJoyBelow":
+                                entry.onlyIfJoyBelow = float.Parse(kv[1]);
+                                break;
+                            case "onlyIfMoodBelow":
+                                entry.onlyIfMoodBelow = float.Parse(kv[1]);
+                                break;
+                            case "takeToInventory":
+                                entry.takeToInventory = int.Parse(kv[1]);
+                                break;
+                            case "takeToInventoryTempBuffer":
+                                entry.takeToInventoryTempBuffer = kv[1];
+                                break;
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                string error = "";
+                if (entry != null && entry.drug != null)
+                {
+                    error = "Unable to load drug policy [" + entry.drug.defName + "].";
+                }
+                else
+                {
+                    error = "Unable to load a drug policy.";
+                }
+
+                if (kv == null || kv.Length < 2)
+                {
+                    error += " Current line: [" + kv[0] + ":" + kv[1] + "]";
+                }
+                Log.Warning(error);
+                entry = null;
                 return false;
             }
             return true;

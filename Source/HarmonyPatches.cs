@@ -27,7 +27,8 @@ namespace SaveStorageSettings
                 "    Postfix:\n" +
                 "        Building.GetGizmos(IEnumerable<Gizmo>)\n" +
                 "        Zone_Stockpile.GetGizmos(IEnumerable<Gizmo>)\n" +
-                "        Dialog_ManageOutfits.DoWindowContents(Rect)\n");
+                "        Dialog_ManageOutfits.DoWindowContents(Rect)\n" +
+                "        Dialog_ManageDrugPolicies.DoWindowContents(Rect)\n");
 
             DeleteXTexture = ContentFinder<Texture2D>.Get("UI/Buttons/Delete", true);
             SaveTexture = ContentFinder<Texture2D>.Get("UI/save", true);
@@ -141,13 +142,13 @@ namespace SaveStorageSettings
             {
                 Text.Font = GameFont.Small;
                 GUI.BeginGroup(new Rect(220f, 49f, 300, 32f));
-                if (Widgets.ButtonText(new Rect(0f, 0f, 150f, 32f), "SaveStorageSettings.SaveOutfit".Translate(), true, false, true))
+                if (Widgets.ButtonText(new Rect(0f, 0f, 150f, 32f), "SaveStorageSettings.LoadOutfit".Translate(), true, false, true))
                 {
                     Find.WindowStack.Add(new LoadFilterDialog("Apparel_Management", selectedOutfit.filter));
                 }
-                if (Widgets.ButtonText(new Rect(160f, 0f, 150f, 32f), "LoadStorageSettings.SaveOutfit".Translate(), true, false, true))
+                if (Widgets.ButtonText(new Rect(160f, 0f, 150f, 32f), "SaveStorageSettings.SaveOutfit".Translate(), true, false, true))
                 {
-                    Find.WindowStack.Add(new LoadFilterDialog("Apparel_Management", selectedOutfit.filter));
+                    Find.WindowStack.Add(new SaveFilterDialog("Apparel_Management", selectedOutfit.filter));
                 }
                 GUI.EndGroup();
             }
@@ -161,6 +162,50 @@ namespace SaveStorageSettings
         private static void SetSelectedOutfit(Dialog_ManageOutfits dialog, Outfit selectedOutfit)
         {
             typeof(Dialog_ManageOutfits).GetProperty("SelectedOutfit", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.GetProperty).SetValue(dialog, selectedOutfit, null);
+        }
+    }
+
+    [HarmonyPatch(typeof(Dialog_ManageDrugPolicies), "DoWindowContents")]
+    static class Patch_Dialog_Dialog_ManageDrugPolicies
+    {
+        static void Postfix(Dialog_ManageDrugPolicies __instance, Rect inRect)
+        {
+            float x = 500;
+            if (Widgets.ButtonText(new Rect(x, 0, 150f, 35f), "SaveStorageSettings.LoadAsNew".Translate(), true, false, true))
+            {
+                DrugPolicy policy = Current.Game.drugPolicyDatabase.MakeNewDrugPolicy();
+                SetDrugPolicy(__instance, policy);
+
+                Find.WindowStack.Add(new LoadPolicyDialog("DrugPolicy", policy));
+            }
+            x += 160;
+
+            DrugPolicy selectedPolicy = GetDrugPolicy(__instance);
+            if (selectedPolicy != null)
+            {
+                Text.Font = GameFont.Small;
+                if (Widgets.ButtonText(new Rect(x, 0f, 75, 35f), "LoadGameButton".Translate(), true, false, true))
+                {
+                    string label = selectedPolicy.label;
+                    Find.WindowStack.Add(new LoadPolicyDialog("DrugPolicy", selectedPolicy));
+                    selectedPolicy.label = label;
+                }
+                x += 80;
+                if (Widgets.ButtonText(new Rect(x, 0f, 75, 35f), "SaveGameButton".Translate(), true, false, true))
+                {
+                    Find.WindowStack.Add(new SavePolicyDialog("DrugPolicy", selectedPolicy));
+                }
+            }
+        }
+
+        private static DrugPolicy GetDrugPolicy(Dialog_ManageDrugPolicies dialog)
+        {
+            return (DrugPolicy)typeof(Dialog_ManageDrugPolicies).GetProperty("SelectedPolicy", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.GetProperty).GetValue(dialog, null);
+        }
+
+        private static void SetDrugPolicy(Dialog_ManageDrugPolicies dialog, DrugPolicy selectedPolicy)
+        {
+            typeof(Dialog_ManageDrugPolicies).GetProperty("SelectedPolicy", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.GetProperty).SetValue(dialog, selectedPolicy, null);
         }
     }
 }

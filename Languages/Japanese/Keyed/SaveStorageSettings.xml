@@ -5,7 +5,7 @@
   <SaveStorageSettings.LoadZoneSettings>設定を読込</SaveStorageSettings.LoadZoneSettings>
   <SaveStorageSettings.LoadZoneSettingsDesc>以前セーブした貯蔵エリアの設定を読み込みます。</SaveStorageSettings.LoadZoneSettingsDesc>
   <SaveStorageSettings.LoadAsNew>新規に読み込む</SaveStorageSettings.LoadAsNew>
+  <SaveStorageSettings.LoadOutfit>服装を読込</SaveStorageSettings.LoadOutfit>
   <SaveStorageSettings.SaveOutfit>服装を保存</SaveStorageSettings.SaveOutfit>
-  <LoadStorageSettings.SaveOutfit>服装を読込</LoadStorageSettings.SaveOutfit>
 
 </LanguageData>

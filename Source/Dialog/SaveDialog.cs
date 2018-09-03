@@ -53,4 +53,29 @@ namespace SaveStorageSettings.Dialog
             base.Close();
         }
     }
+
+    class SavePolicyDialog : FileListDialog
+    {
+        private readonly DrugPolicy DrugPolicy;
+
+        internal SavePolicyDialog(string type, DrugPolicy drugPolicy) : base(type)
+        {
+            this.DrugPolicy = drugPolicy;
+            this.interactButLabel = "OverwriteButton".Translate();
+        }
+
+        protected override bool ShouldDoTypeInField
+        {
+            get
+            {
+                return true;
+            }
+        }
+
+        protected override void DoFileInteraction(FileInfo fi)
+        {
+            IOUtil.SavePolicySettings(this.DrugPolicy, fi);
+            base.Close();
+        }
+    }
 }
