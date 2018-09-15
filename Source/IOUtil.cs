@@ -85,7 +85,7 @@ namespace SaveStorageSettings
                             throw new Exception("Trying to read from an empty file");
                         }
 
-                        if (kv != null && "1".Equals(kv[1]))
+                        if (kv != null && "2".Equals(kv[1]))
                         {
                             string line = "";
                             while (!sr.EndOfStream)
@@ -107,13 +107,13 @@ namespace SaveStorageSettings
                                 }
                                 catch
                                 {
-                                    Log.Warning("Unable to load a bill for [" + line + "]");
+                                    Log.Error("Unable to load a bill for [" + line + "]");
                                 }
                             }
                         }
                         else
                         {
-                            throw new Exception("Unsupported version: " + kv[1]);
+                            Log.Error("This version of save files is not supported Please create a new one. File: " + kv[1]);
                         }
                     }
                 }
@@ -220,7 +220,7 @@ namespace SaveStorageSettings
                 {
                     using (StreamWriter sw = new StreamWriter(fileStream))
                     {
-                        WriteField(sw, "Version", "1");
+                        WriteField(sw, "Version", "2");
 
                         foreach (Bill b in bills)
                         {
@@ -228,7 +228,14 @@ namespace SaveStorageSettings
                             {
                                 Bill_Production p = b as Bill_Production;
                                 WriteField(sw, "bill", p.recipe.defName);
-                                WriteField(sw, "recipeDefName", p.recipe.defName);
+                                if (b is Bill_ProductionWithUft)
+                                {
+                                    WriteField(sw, "recipeDefNameUft", p.recipe.defName);
+                                }
+                                else
+                                {
+                                    WriteField(sw, "recipeDefName", p.recipe.defName);
+                                }
                                 WriteField(sw, "skillRange", p.allowedSkillRange.ToString());
                                 WriteField(sw, "suspended", p.suspended.ToString());
                                 WriteField(sw, "ingSearchRadius", p.ingredientSearchRadius.ToString());
@@ -258,7 +265,7 @@ namespace SaveStorageSettings
             }
             catch (Exception e)
             {
-                LogException("Problem saving storage settings file '" + fi.Name + "'.", e);
+                LogException("Problem saving crafting bills file '" + fi.Name + "'.", e);
                 return false;
             }
             return true;
@@ -312,18 +319,28 @@ namespace SaveStorageSettings
                 {
                     if (ReadField(sr, out kv))
                     {
+                        RecipeDef def;
                         switch (kv[0])
                         {
                             case BREAK:
                                 return true;
                             case "recipeDefName":
-                                RecipeDef def = DefDatabase<RecipeDef>.GetNamed(kv[1]);
+                                def = DefDatabase<RecipeDef>.GetNamed(kv[1]);
                                 if (def == null)
                                 {
                                     Log.Warning("Unable to load bill with RecipeDef of [" + kv[1] + "]");
                                     return false;
                                 }
                                 bill = new Bill_Production(def);
+                                break;
+                            case "recipeDefNameUft":
+                                def = DefDatabase<RecipeDef>.GetNamed(kv[1]);
+                                if (def == null)
+                                {
+                                    Log.Warning("Unable to load bill with RecipeDef of [" + kv[1] + "]");
+                                    return false;
+                                }
+                                bill = new Bill_ProductionWithUft(def);
                                 break;
                             case "skillRange":
                                 kv = kv[1].Split('~');
