@@ -23,12 +23,13 @@ namespace SaveStorageSettings
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             Log.Message(
-                "SaveStorageSettings: Harmony Patches:\n" +
-                "    Postfix:\n" +
-                "        Building.GetGizmos(IEnumerable<Gizmo>)\n" +
-                "        Zone_Stockpile.GetGizmos(IEnumerable<Gizmo>)\n" +
-                "        Dialog_ManageOutfits.DoWindowContents(Rect)\n" +
-                "        Dialog_ManageDrugPolicies.DoWindowContents(Rect)\n");
+                "SaveStorageSettings: Harmony Patches:" + Environment.NewLine +
+                "    Postfix:" + Environment.NewLine +
+                "        Building.GetGizmos(IEnumerable<Gizmo>)" + Environment.NewLine +
+                "        Zone_Stockpile.GetGizmos(IEnumerable<Gizmo>)" + Environment.NewLine +
+                "        Dialog_ManageOutfits.DoWindowContents(Rect)" + Environment.NewLine +
+                "        Dialog_ManageDrugPolicies.DoWindowContents(Rect)" + Environment.NewLine +
+                "        Building_Storage.GetGizmos");
 
             DeleteXTexture = ContentFinder<Texture2D>.Get("UI/Buttons/Delete", true);
             SaveTexture = ContentFinder<Texture2D>.Get("UI/save", true);
@@ -112,6 +113,45 @@ namespace SaveStorageSettings
                     return null;
             }
             return defName;
+        }
+    }
+
+    [HarmonyPatch(typeof(Building_Storage), "GetGizmos")]
+    static class Patch_BuildingStorage_GetGizmos
+    {
+        static void Postfix(Building __instance, ref IEnumerable<Gizmo> __result)
+        {
+            if (__instance.def.defName.Equals("Shelf"))
+            {
+                List<Gizmo> gizmos = new List<Gizmo>(__result)
+                    {
+                        new Command_Action
+                        {
+                            icon = HarmonyPatches.SaveTexture,
+                            defaultLabel = "SaveStorageSettings.SaveZoneSettings".Translate(),
+                            defaultDesc = "SaveStorageSettings.SaveZoneSettingsDesc".Translate(),
+                            activateSound = SoundDef.Named("Click"),
+                            action = delegate {
+                                Find.WindowStack.Add(new SaveFilterDialog("shelf", ((Building_Storage)__instance).settings.filter));
+                            },
+                            groupKey = 987767552
+                        },
+
+                        new Command_Action
+                        {
+                            icon = HarmonyPatches.LoadTexture,
+                            defaultLabel = "SaveStorageSettings.LoadZoneSettings".Translate(),
+                            defaultDesc = "SaveStorageSettings.LoadZoneSettingsDesc".Translate(),
+                            activateSound = SoundDef.Named("Click"),
+                            action = delegate {
+                                Find.WindowStack.Add(new LoadFilterDialog("shelf", ((Building_Storage)__instance).settings.filter));
+                            },
+                            groupKey = 987767553
+                        }
+                    };
+
+                __result = gizmos;
+            }
         }
     }
 
