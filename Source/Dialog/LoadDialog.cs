@@ -84,6 +84,41 @@ namespace SaveStorageSettings.Dialog
         }
     }
 
+    class LoadOperationDialog : FileListDialog
+    {
+        private readonly Pawn Pawn;
+
+        internal LoadOperationDialog(Pawn pawn, string storageTypeName) : base(storageTypeName)
+        {
+            this.Pawn = pawn;
+            this.interactButLabel = "LoadGameButton".Translate();
+        }
+
+        protected override bool ShouldDoTypeInField
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        protected override void DoFileInteraction(FileInfo fi)
+        {
+            List<Bill> bills = IOUtil.LoadOperationBills(fi, this.Pawn);
+            if (bills != null && bills.Count > 0)
+            {
+                this.Pawn.BillStack.Clear();
+                foreach (Bill b in bills)
+                {
+                    this.Pawn.BillStack.AddBill(b);
+                }
+                bills.Clear();
+                bills = null;
+            }
+            base.Close();
+        }
+    }
+
     class LoadPolicyDialog : FileListDialog
     {
         private readonly DrugPolicy DrugPolicy;

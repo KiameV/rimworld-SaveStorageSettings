@@ -54,6 +54,31 @@ namespace SaveStorageSettings.Dialog
         }
     }
 
+    class SaveOperationDialog : FileListDialog
+    {
+        private readonly Pawn Pawn;
+
+        internal SaveOperationDialog(string type, Pawn pawn) : base(type)
+        {
+            this.Pawn = pawn;
+            this.interactButLabel = "OverwriteButton".Translate();
+        }
+
+        protected override bool ShouldDoTypeInField
+        {
+            get
+            {
+                return true;
+            }
+        }
+
+        protected override void DoFileInteraction(FileInfo fi)
+        {
+            IOUtil.SaveOperationSettings(this.Pawn, fi);
+            base.Close();
+        }
+    }
+
     class SavePolicyDialog : FileListDialog
     {
         private readonly DrugPolicy DrugPolicy;

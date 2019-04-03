@@ -68,6 +68,7 @@ namespace SaveStorageSettings
             }
             return true;
         }
+
         public static List<Bill> LoadCraftingBills(FileInfo fi)
         {
             List<Bill> bills = new List<Bill>();
@@ -102,6 +103,63 @@ namespace SaveStorageSettings
                                             {
                                                 bills.Add(b);
                                             }
+                                        }
+                                    }
+                                }
+                                catch
+                                {
+                                    Log.Error("Unable to load a bill for [" + line + "]");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Log.Error("This version of save files is not supported Please create a new one. File: " + kv[1]);
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                LogException("Problem loading storage settings file '" + fi.Name + "'.", e);
+            }
+            return bills;
+        }
+
+        internal static List<Bill> LoadOperationBills(FileInfo fi, Pawn pawn)
+        {
+            List<Bill> bills = new List<Bill>();
+            try
+            {
+                if (fi.Exists)
+                {
+                    // Load Data
+                    using (StreamReader sr = new StreamReader(fi.FullName))
+                    {
+                        string[] kv = null;
+                        if (sr.EndOfStream ||
+                            !ReadField(sr, out kv))
+                        {
+                            throw new Exception("Trying to read from an empty file");
+                        }
+
+                        if (kv != null && "2".Equals(kv[1]))
+                        {
+                            string line = "";
+                            while (!sr.EndOfStream)
+                            {
+                                try
+                                {
+                                    line = sr.ReadLine().Trim();
+                                    if (line != null && line.StartsWith("bill:"))
+                                    {
+                                        if (TryCreateBill(sr, pawn, out Bill_Medical b))
+                                        {
+                                            bills.Add(b);
+                                        }
+                                        else
+                                        {
+                                            Log.Warning("Unable to load operation bill [" + line.Split(':')[1] + "]");
                                         }
                                     }
                                 }
@@ -206,6 +264,41 @@ namespace SaveStorageSettings
             catch (Exception e)
             {
                 LogException("Problem saving storage settings file '" + fi.Name + "'.", e);
+                return false;
+            }
+            return true;
+        }
+
+        public static bool SaveOperationSettings(Pawn pawn, FileInfo fi)
+        {
+            try
+            {
+                // Write Data
+                using (FileStream fileStream = File.Open(fi.FullName, FileMode.Create, FileAccess.Write))
+                {
+                    using (StreamWriter sw = new StreamWriter(fileStream))
+                    {
+                        WriteField(sw, "Version", "2");
+
+                        foreach (Bill b in pawn.BillStack)
+                        {
+                            if (b is Bill_Medical m)
+                            {
+                                WriteField(sw, "bill", b.recipe.defName);
+                                WriteField(sw, "recipeDefName", b.recipe.defName);
+                                if (m.recipe.targetsBodyPart)
+                                {
+                                    WriteField(sw, "part", m.Part.Label + ":" + m.Part.def.defName);
+                                }
+                                WriteField(sw, BREAK, BREAK);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                LogException("Problem saving operation bills file '" + fi.Name + "'.", e);
                 return false;
             }
             return true;
@@ -414,6 +507,95 @@ namespace SaveStorageSettings
                 {
                     error += " Current line: [" + kv[0] + ":" + kv[1] + "]";
                 }
+                Log.Warning(error);
+                bill = null;
+                return false;
+            }
+            return true;
+        }
+
+        private static bool TryCreateBill(StreamReader sr, Pawn pawn, out Bill_Medical bill)
+        {
+            bill = null;
+            string[] kv = null;
+            try
+            {
+                while (!sr.EndOfStream)
+                {
+                    if (ReadField(sr, out kv))
+                    {
+                        switch (kv[0])
+                        {
+                            case BREAK:
+                                return true;
+                            case "recipeDefName":
+                                var def = DefDatabase<RecipeDef>.GetNamed(kv[1]);
+                                if (def == null)
+                                {
+                                    Log.Warning("Unable to load bill with RecipeDef of [" + kv[1] + "]");
+                                    return false;
+                                }
+                                bill = new Bill_Medical(def);
+                                break;
+                            case "part":
+                                var pv = kv[1].Split(':');
+                                if (bill.recipe.defName.StartsWith("Remove"))
+                                {
+                                    bill.Part = null;
+                                    string partToFind = pv[0];
+                                    foreach (BodyPartRecord part in pawn.health.hediffSet.GetNotMissingParts(BodyPartHeight.Undefined, BodyPartDepth.Undefined, null, null))
+                                    {
+                                        if (part.Label.Equals(partToFind))
+                                        {
+                                            bill.Part = part;
+                                            break;
+                                        }
+                                    }
+                                    if (bill.Part == null)
+                                    {
+                                        Log.Warning("Pawn [" + pawn.Name.ToStringShort + "] does not have body part [" + partToFind + "] to have removed.");
+                                        return false;
+                                    }
+                                }
+                                else if (bill.recipe.defName.StartsWith("Install"))
+                                {
+                                    string partToFind = pv[1];
+                                    foreach (BodyPartRecord p in pawn.RaceProps.body.AllParts)
+                                    {
+                                        if (p.def.defName.Equals(partToFind))
+                                        {
+                                            bill.Part = p;
+                                            break;
+                                        }
+                                    }
+                                    if (bill.Part == null)
+                                    {
+                                        Log.Warning("Unknown body part [" + partToFind + "].");
+                                        return false;
+                                    }
+                                }
+                                break;
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                string error = "";
+                if (bill != null && bill.recipe != null)
+                {
+                    error = "Unable to load bill [" + bill.recipe.defName + "].";
+                }
+                else
+                {
+                    error = "Unable to load a bill.";
+                }
+
+                if (kv == null || kv.Length < 2)
+                {
+                    error += " Current line: [" + kv[0] + ":" + kv[1] + "]";
+                }
+                Log.Error(e.GetType().Name + " - " + e.Message);
                 Log.Warning(error);
                 bill = null;
                 return false;

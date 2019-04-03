@@ -38,6 +38,73 @@ namespace SaveStorageSettings
         }
     }
 
+    [HarmonyPatch(typeof(HealthCardUtility), "DrawHealthSummary")]
+    static class Patch_HealthCardUtility_DrawHealthSummary
+    {
+        public static long LastCallTime = 0;
+
+        [HarmonyPriority(Priority.First)]
+        static void Prefix()
+        {
+            LastCallTime = DateTime.Now.Ticks;
+        }
+    }
+
+    [HarmonyPatch(typeof(Pawn), "GetGizmos")]
+    static class Patch_Pawn_GetGizmos
+    {
+        const long TENTH_SECOND = TimeSpan.TicksPerSecond / 10;
+        static FieldInfo OnOperationTab = null;
+        static Patch_Pawn_GetGizmos()
+        {
+            OnOperationTab = typeof(HealthCardUtility).GetField("onOperationTab", BindingFlags.Static | BindingFlags.NonPublic);
+        }
+        static void Postfix(Pawn __instance, ref IEnumerable<Gizmo> __result)
+        {
+            if (!(bool)OnOperationTab.GetValue(null))
+                return;
+
+            if (!__instance.IsColonist && !__instance.IsPrisoner)
+                return;
+            
+            if (DateTime.Now.Ticks - Patch_HealthCardUtility_DrawHealthSummary.LastCallTime < TENTH_SECOND)
+            {
+                string type = "OperationHuman";
+                if (__instance.RaceProps.Animal)
+                    type = "OperationAnimal";
+
+                List<Gizmo> gizmos = new List<Gizmo>(__result)
+                {
+                    new Command_Action
+                    {
+                        icon = HarmonyPatches.SaveTexture,
+                        defaultLabel = "SaveStorageSettings.SaveOperations".Translate(),
+                        defaultDesc = "SaveStorageSettings.SaveOperations".Translate(),
+                        activateSound = SoundDef.Named("Click"),
+                        action = delegate {
+                            Find.WindowStack.Add(new SaveOperationDialog(type, __instance));
+                        },
+                        groupKey = 987764552
+                    },
+
+                    new Command_Action
+                    {
+                        icon = HarmonyPatches.AppendTexture,
+                        defaultLabel = "SaveStorageSettings.LoadOperations".Translate(),
+                        defaultDesc = "SaveStorageSettings.LoadOperations".Translate(),
+                        activateSound = SoundDef.Named("Click"),
+                        action = delegate {
+                            Find.WindowStack.Add(new LoadOperationDialog(__instance, type));
+                        },
+                        groupKey = 987764553
+                    },
+                };
+
+                __result = gizmos;
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(Building), "GetGizmos")]
     static class Patch_Building_GetGizmos
     {
