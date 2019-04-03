@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LanguageData>
+
   <SaveStorageSettings.SaveZoneSettings>設定を保存</SaveStorageSettings.SaveZoneSettings>
   <SaveStorageSettings.SaveZoneSettingsDesc>この貯蔵エリアの設定を保存します。</SaveStorageSettings.SaveZoneSettingsDesc>
   <SaveStorageSettings.LoadZoneSettings>設定を読込</SaveStorageSettings.LoadZoneSettings>
@@ -15,5 +16,8 @@
   <SaveStorageSettings.LoadAsNew>新規に読込</SaveStorageSettings.LoadAsNew>
   <SaveStorageSettings.LoadOutfit>服装を読込</SaveStorageSettings.LoadOutfit>
   <SaveStorageSettings.SaveOutfit>服装を保存</SaveStorageSettings.SaveOutfit>
+
+  <SaveStorageSettings.LoadOperations>手術を読込</SaveStorageSettings.LoadOperations>
+  <SaveStorageSettings.SaveOperations>手術を保存</SaveStorageSettings.SaveOperations>
 
 </LanguageData>
