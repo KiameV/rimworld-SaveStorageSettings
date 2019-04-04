@@ -145,15 +145,14 @@ namespace RimWorld
 
         protected void ReloadFiles()
         {
-            string path;
-            IOUtil.TryGetDirectoryPath(this.StorageTypeName, out path);
+            IOUtil.TryGetDirectoryPath(this.StorageTypeName, out string path);
 
             this.files.Clear();
             foreach (string file in Directory.GetFiles(path))
             {
                 try
                 {
-                    this.files.Add(new FileInfo(Path.Combine(path, file)));
+                    this.files.Add(new FileInfo(file));
                 }
                 catch (Exception ex)
                 {

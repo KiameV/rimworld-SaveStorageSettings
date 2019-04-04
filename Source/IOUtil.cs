@@ -421,7 +421,16 @@ namespace SaveStorageSettings
                                 def = DefDatabase<RecipeDef>.GetNamed(kv[1]);
                                 if (def == null)
                                 {
-                                    Log.Warning("Unable to load bill with RecipeDef of [" + kv[1] + "]");
+                                    string msg = "SaveStorageSettings.UnableToLoadRecipeDef".Translate().Replace("%s", kv[1]);
+                                    Messages.Message(msg, MessageTypeDefOf.SilentInput);
+                                    Log.Warning(msg);
+                                    return false;
+                                }
+                                if (def.researchPrerequisite != null && !def.researchPrerequisite.IsFinished)
+                                {
+                                    string msg = "SaveStorageSettings.ResearchNotDoneForRecipeDef".Translate().Replace("%s", def.label);
+                                    Messages.Message(msg, MessageTypeDefOf.SilentInput);
+                                    Log.Warning(msg);
                                     return false;
                                 }
                                 bill = new Bill_Production(def);
@@ -430,7 +439,16 @@ namespace SaveStorageSettings
                                 def = DefDatabase<RecipeDef>.GetNamed(kv[1]);
                                 if (def == null)
                                 {
-                                    Log.Warning("Unable to load bill with RecipeDef of [" + kv[1] + "]");
+                                    string msg = "SaveStorageSettings.UnableToLoadRecipeDef".Translate().Replace("%s", kv[1]);
+                                    Messages.Message(msg, MessageTypeDefOf.SilentInput);
+                                    Log.Warning(msg);
+                                    return false;
+                                }
+                                if (def.researchPrerequisite != null && !def.researchPrerequisite.IsFinished)
+                                {
+                                    string msg = "SaveStorageSettings.ResearchNotDoneForRecipeDef".Translate().Replace("%s", def.label);
+                                    Messages.Message(msg, MessageTypeDefOf.SilentInput);
+                                    Log.Warning(msg);
                                     return false;
                                 }
                                 bill = new Bill_ProductionWithUft(def);
