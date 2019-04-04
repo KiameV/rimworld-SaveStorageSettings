@@ -464,13 +464,21 @@ namespace SaveStorageSettings
                                 bill.ingredientSearchRadius = float.Parse(kv[1]);
                                 break;
                             case "repeatMode":
+                                bill.repeatMode = null;
                                 if (BillRepeatModeDefOf.Forever.defName.Equals(kv[1]))
                                     bill.repeatMode = BillRepeatModeDefOf.Forever;
                                 else if (BillRepeatModeDefOf.RepeatCount.defName.Equals(kv[1]))
                                     bill.repeatMode = BillRepeatModeDefOf.RepeatCount;
                                 else if (BillRepeatModeDefOf.TargetCount.defName.Equals(kv[1]))
                                     bill.repeatMode = BillRepeatModeDefOf.TargetCount;
-                                else
+                                else if ("TD_ColonistCount".Equals(kv[1]))
+                                    EverybodyGetsOneUtil.TryGetRepeatModeDef("TD_ColonistCount", out bill.repeatMode);
+                                else if ("TD_XPerColonist".Equals(kv[1]))
+                                    EverybodyGetsOneUtil.TryGetRepeatModeDef("TD_XPerColonist", out bill.repeatMode);
+                                else if ("TD_WithSurplusIng".Equals(kv[1]))
+                                    EverybodyGetsOneUtil.TryGetRepeatModeDef("TD_WithSurplusIng", out bill.repeatMode);
+
+                                if (bill.repeatMode == null)
                                 {
                                     Log.Warning("Unknown repeatMode of [" + kv[1] + "] for bill " + bill.recipe.defName);
                                     bill = null;
@@ -930,6 +938,49 @@ namespace SaveStorageSettings
             }
             WriteField(sw, "disallowedSpecialFilters", sb.ToString());
             sb = null;
+        }
+    }
+
+    class EverybodyGetsOneUtil
+    {
+        private static Assembly ego = null;
+        private static bool initialized = false;
+        public static bool Exists
+        {
+            get
+            {
+                if (!initialized)
+                {
+                    foreach (ModContentPack pack in LoadedModManager.RunningMods)
+                    {
+                        foreach (Assembly assembly in pack.assemblies.loadedAssemblies)
+                        {
+                            if (assembly.GetName().Name.Equals("Everybody_Gets_One") &&
+                                assembly.GetType("TD_Enhancement_Pack.RepeatModeDefOf") != null)
+                            {
+                                initialized = true;
+                                ego = assembly;
+                                break;
+                            }
+                        }
+                        if (initialized)
+                        {
+                            break;
+                        }
+                    }
+                    initialized = true;
+                }
+                return ego != null;
+            }
+        }
+
+        public static bool TryGetRepeatModeDef(string defName, out BillRepeatModeDef def)
+        {
+            Log.Warning("Try get " + defName);
+            def = null;
+            if (Exists)
+                def = ego.GetType("TD_Enhancement_Pack.RepeatModeDefOf").GetField(defName, BindingFlags.Static | BindingFlags.Public).GetValue(null) as BillRepeatModeDef;
+            return def != null;
         }
     }
 }
