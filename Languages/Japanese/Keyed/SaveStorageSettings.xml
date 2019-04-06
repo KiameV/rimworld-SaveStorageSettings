@@ -20,4 +20,8 @@
   <SaveStorageSettings.LoadOperations>手術を読込</SaveStorageSettings.LoadOperations>
   <SaveStorageSettings.SaveOperations>手術を保存</SaveStorageSettings.SaveOperations>
 
+  <!-- %s will be replaced by the def name -->
+  <SaveStorageSettings.UnableToLoadRecipeDef>RecipeDef(%s)で加工命令を読込めません</SaveStorageSettings.UnableToLoadRecipeDef>
+  <SaveStorageSettings.ResearchNotDoneForRecipeDef>%sに必要な研究が完了してない</SaveStorageSettings.ResearchNotDoneForRecipeDef>
+
 </LanguageData>
