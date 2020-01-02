@@ -1,6 +1,7 @@
 ﻿using RimWorld;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Verse;
 
 namespace SaveStorageSettings.Dialog
@@ -12,7 +13,7 @@ namespace SaveStorageSettings.Dialog
         internal LoadFilterDialog(string storageTypeName, ThingFilter thingFilter) : base(storageTypeName)
         {
             this.ThingFilter = thingFilter;
-            this.interactButLabel = "LoadGameButton".Translate();
+            base.interactButLabel = "LoadGameButton".Translate();
         }
 
         protected override bool ShouldDoTypeInField
@@ -58,6 +59,12 @@ namespace SaveStorageSettings.Dialog
 
         protected override void DoFileInteraction(FileInfo fi)
         {
+            int maxBillCount = 15;
+            if (ModsConfig.ActiveModsInLoadOrder.Any(m => m.Name.Contains("No Max Bills")))
+            {
+                maxBillCount = 125;
+            }
+
             List<Bill> bills = IOUtil.LoadCraftingBills(fi);
             if (bills != null && bills.Count > 0)
             {
@@ -68,7 +75,7 @@ namespace SaveStorageSettings.Dialog
 
                 foreach (Bill b in bills)
                 {
-                    if (this.BillStack.Count < BillStack.MaxCount)
+                    if (this.BillStack.Count < maxBillCount)
                     {
                         this.BillStack.AddBill(b);
                     }
@@ -111,6 +118,7 @@ namespace SaveStorageSettings.Dialog
                 foreach (Bill b in bills)
                 {
                     this.Pawn.BillStack.AddBill(b);
+                    Log.Warning("Bills Count: " + this.Pawn.BillStack.Count);
                 }
                 bills.Clear();
                 bills = null;
