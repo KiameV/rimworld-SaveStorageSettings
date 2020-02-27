@@ -1,4 +1,4 @@
-﻿using Harmony;
+﻿using HarmonyLib;
 using RimWorld;
 using SaveStorageSettings.Dialog;
 using System.Collections.Generic;
@@ -19,7 +19,7 @@ namespace SaveStorageSettings
 
         static HarmonyPatches()
         {
-            var harmony = HarmonyInstance.Create("com.savestoragesettings.rimworld.mod");
+            var harmony = new Harmony("com.savestoragesettings.rimworld.mod");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             Log.Message(

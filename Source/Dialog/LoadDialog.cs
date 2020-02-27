@@ -118,7 +118,7 @@ namespace SaveStorageSettings.Dialog
                 foreach (Bill b in bills)
                 {
                     this.Pawn.BillStack.AddBill(b);
-                    Log.Warning("Bills Count: " + this.Pawn.BillStack.Count);
+                    //Log.Warning("Bills Count: " + this.Pawn.BillStack.Count);
                 }
                 bills.Clear();
                 bills = null;
