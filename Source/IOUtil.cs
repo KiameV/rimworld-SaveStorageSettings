@@ -320,6 +320,11 @@ namespace SaveStorageSettings
                             if (b is Bill_Production)
                             {
                                 Bill_Production p = b as Bill_Production;
+
+                                BillStoreModeDef storeMode       = p.GetStoreMode();
+                                Zone_Stockpile   storeZone       = p.GetStoreZone();
+                                Zone_Stockpile   includeFromZone = p.includeFromZone;
+
                                 WriteField(sw, "bill", p.recipe.defName);
                                 if (b is Bill_ProductionWithUft)
                                 {
@@ -332,22 +337,21 @@ namespace SaveStorageSettings
                                 WriteField(sw, "skillRange", p.allowedSkillRange.ToString());
                                 WriteField(sw, "suspended", p.suspended.ToString());
                                 WriteField(sw, "ingSearchRadius", p.ingredientSearchRadius.ToString());
-                                BillStoreModeDef storeMode = p.GetStoreMode();
-                                if (storeMode == BillStoreModeDefOf.SpecificStockpile)
-                                {
-                                    Log.Message(
-                                        "Saving bill [" + p.recipe.defName + 
-                                        "] store mode from [" + BillStoreModeDefOf.SpecificStockpile.ToString() + 
-                                        "] to [" + BillStoreModeDefOf.BestStockpile.ToString() + "]");
-                                    storeMode = BillStoreModeDefOf.BestStockpile;
-                                }
-                                WriteField(sw, "storeMode", storeMode.defName);
+                                WriteField(sw, "storeMode", storeMode == BillStoreModeDefOf.SpecificStockpile ?
+                                    string.Join("/", storeMode.defName, storeZone.GetUniqueLoadID()) :
+                                    storeMode.defName
+                                );
                                 WriteField(sw, "repeatMode", p.repeatMode.defName);
                                 WriteField(sw, "repeatCount", p.repeatCount.ToString());
                                 WriteField(sw, "targetCount", p.targetCount.ToString());
+                                WriteField(sw, "includeEquipped", p.includeEquipped.ToString());
+                                WriteField(sw, "includeTainted", p.includeTainted.ToString());
+                                if (includeFromZone != null) WriteField(sw, "includeFromZone", includeFromZone.GetUniqueLoadID());
+                                WriteField(sw, "limitToAllowedStuff", p.limitToAllowedStuff.ToString());
                                 WriteField(sw, "pauseWhenSatisfied", p.pauseWhenSatisfied.ToString());
                                 WriteField(sw, "unpauseWhenYouHave", p.unpauseWhenYouHave.ToString());
                                 WriteField(sw, "hpRange", p.hpRange.ToString());
+                                WriteField(sw, "qualityRange", p.qualityRange.ToString());
                                 WriteField(sw, "ingredientFilter", "");
                                 WriteFiltersToFile(p.ingredientFilter, sw);
                             }
@@ -489,16 +493,50 @@ namespace SaveStorageSettings
                                 bill.repeatCount = int.Parse(kv[1]);
                                 break;
                             case "storeMode":
-                                BillStoreModeDef storeMode = DefDatabase<BillStoreModeDef>.GetNamedSilentFail(kv[1]);
+                                string[] storeSplit = kv[1].Split('/');
+
+                                BillStoreModeDef storeMode = DefDatabase<BillStoreModeDef>.GetNamedSilentFail(storeSplit[0]);
                                 if (storeMode == null)
                                 {
                                     Log.Message("Bill [" + bill.recipe.defName + "] storeMode [" + kv[1] + "] cannot be found. Defaulting to [" + BillStoreModeDefOf.BestStockpile.ToString() + "].");
                                     storeMode = BillStoreModeDefOf.BestStockpile;
                                 }
-                                bill.SetStoreMode(storeMode);
+
+                                Zone_Stockpile storeZone = null;
+                                if (storeMode == BillStoreModeDefOf.SpecificStockpile)
+                                {
+                                    if (storeSplit.Length > 1) storeZone = (Zone_Stockpile)Find.CurrentMap?.zoneManager.AllZones.FirstOrFallback(z => z.GetUniqueLoadID() == storeSplit[1]);
+
+                                    if (storeZone == null)
+                                    {
+                                        Log.Message("Bill [" + bill.recipe.defName + "] storeZone [" + kv[1] + "] cannot be found. Defaulting to storeMode [" + BillStoreModeDefOf.BestStockpile.ToString() + "].");
+                                        storeMode = BillStoreModeDefOf.BestStockpile;
+                                    }
+                                }
+
+                                bill.SetStoreMode(storeMode, storeZone);
                                 break;
                             case "targetCount":
                                 bill.targetCount = int.Parse(kv[1]);
+                                break;
+                            case "includeEquipped":
+                                bill.includeEquipped = bool.Parse(kv[1]);
+                                break;
+                            case "includeTainted":
+                                bill.includeTainted = bool.Parse(kv[1]);
+                                break;
+                            case "includeFromZone":
+                                Zone_Stockpile zone = (Zone_Stockpile)Find.CurrentMap?.zoneManager.AllZones.FirstOrFallback(z => z.GetUniqueLoadID() == kv[1]);
+
+                                if (zone == null)
+                                {
+                                    Log.Message("Bill [" + bill.recipe.defName + "] includeFromZone [" + kv[1] + "] cannot be found. Defaulting to Everywhere (null).");
+                                }
+
+                                bill.includeFromZone = zone;
+                                break;
+                            case "limitToAllowedStuff":
+                                bill.limitToAllowedStuff = bool.Parse(kv[1]);
                                 break;
                             case "pauseWhenSatisfied":
                                 bill.pauseWhenSatisfied = bool.Parse(kv[1]);
@@ -509,6 +547,9 @@ namespace SaveStorageSettings
                             case "hpRange":
                                 kv = kv[1].Split('~');
                                 bill.hpRange = new FloatRange(float.Parse(kv[0]), float.Parse(kv[1]));
+                                break;
+                            case "qualityRange":
+                                bill.qualityRange = QualityRange.FromString(kv[1]);
                                 break;
                             case "ingredientFilter":
                                 ReadFiltersFromFile(bill.ingredientFilter, sr);
