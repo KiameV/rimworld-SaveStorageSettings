@@ -955,8 +955,12 @@ namespace SaveStorageSettings
                     {
                         foreach (Assembly assembly in pack.assemblies.loadedAssemblies)
                         {
-                            if (assembly.GetName().Name.Equals("Everybody_Gets_One") &&
-                                assembly.GetType("TD_Enhancement_Pack.RepeatModeDefOf") != null)
+                            if (
+                                assembly.GetName().Name.Equals("Everybody_Gets_One") && (
+                                    assembly.GetType("Everybody_Gets_One.RepeatModeDefOf")  != null ||
+                                    assembly.GetType("TD_Enhancement_Pack.RepeatModeDefOf") != null
+                                )
+                            )
                             {
                                 initialized = true;
                                 ego = assembly;
@@ -978,8 +982,10 @@ namespace SaveStorageSettings
         {
             Log.Warning("Try get " + defName);
             def = null;
-            if (Exists)
-                def = ego.GetType("TD_Enhancement_Pack.RepeatModeDefOf").GetField(defName, BindingFlags.Static | BindingFlags.Public).GetValue(null) as BillRepeatModeDef;
+            if (Exists) {
+                Type repeatModeType = ego.GetType("Everybody_Gets_One.RepeatModeDefOf") ?? ego.GetType("TD_Enhancement_Pack.RepeatModeDefOf");
+                def = repeatModeType.GetField(defName, BindingFlags.Static | BindingFlags.Public).GetValue(null) as BillRepeatModeDef;
+            }
             return def != null;
         }
     }
