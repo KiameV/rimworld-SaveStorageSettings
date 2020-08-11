@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <projectUrl>https://github.com/KiameV/rimworld-SaveStorageSettings</projectUrl>
+    <iconUrl>https://static.thenounproject.com/png/53502-200.png</iconUrl>
+    <description>$description$</description>
+    <releaseNotes>Initial Release</releaseNotes>
+    <copyright>Copyright 2020</copyright>
+    <tags>Rimworld Mod SaveStorageSettings</tags>
+  </metadata>
+</package>
