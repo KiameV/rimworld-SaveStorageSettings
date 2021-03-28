@@ -15,6 +15,9 @@ Future Plans: Add support for other types of Storage Zones.
 Thank you to the translators:
 -Proxyer for Japanese
 -HawnHan for Chinese
+
+Special Thanks:
+-SineSniper for updating Everybody Gets One support
 	</description>
 	<packageId>savestoragesettings.kv.rw</packageId>
 </ModMetaData>
