@@ -22,15 +22,6 @@ namespace SaveStorageSettings
             var harmony = new Harmony("com.savestoragesettings.rimworld.mod");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-            Log.Message(
-                "SaveStorageSettings: Harmony Patches:" + Environment.NewLine +
-                "    Postfix:" + Environment.NewLine +
-                "        Building.GetGizmos(IEnumerable<Gizmo>)" + Environment.NewLine +
-                "        Zone_Stockpile.GetGizmos(IEnumerable<Gizmo>)" + Environment.NewLine +
-                "        Dialog_ManageOutfits.DoWindowContents(Rect)" + Environment.NewLine +
-                "        Dialog_ManageDrugPolicies.DoWindowContents(Rect)" + Environment.NewLine +
-                "        Building_Storage.GetGizmos");
-
             DeleteXTexture = ContentFinder<Texture2D>.Get("UI/Buttons/Delete", true);
             SaveTexture = ContentFinder<Texture2D>.Get("UI/save", true);
             LoadTexture = ContentFinder<Texture2D>.Get("UI/load", true);
@@ -147,7 +138,7 @@ namespace SaveStorageSettings
 
         private static string GetType(string defName)
         {
-            switch(defName)
+            switch (defName)
             {
                 case "ButcherSpot":
                 case "TableButcher":
@@ -179,8 +170,10 @@ namespace SaveStorageSettings
                 yield return aGizmo;
             }
 
-            if (__instance.def.defName.Equals("Shelf"))
+            if (__instance is Building_Storage)
             {
+                string type = GetType(__instance.def.defName);
+
                 yield return new Command_Action
                 {
                     icon = HarmonyPatches.SaveTexture,
@@ -188,7 +181,7 @@ namespace SaveStorageSettings
                     defaultDesc = "SaveStorageSettings.SaveZoneSettingsDesc".Translate(),
                     activateSound = SoundDef.Named("Click"),
                     action = delegate {
-                        Find.WindowStack.Add(new SaveFilterDialog("shelf", ((Building_Storage)__instance).settings.filter));
+                        Find.WindowStack.Add(new SaveFilterDialog(type, ((Building_Storage)__instance).settings.filter));
                     },
                     groupKey = 987767552
                 };
@@ -201,12 +194,26 @@ namespace SaveStorageSettings
                     activateSound = SoundDef.Named("Click"),
                     action = delegate
                     {
-                        Find.WindowStack.Add(new LoadFilterDialog("shelf", ((Building_Storage)__instance).settings.filter));
+                        Find.WindowStack.Add(new LoadFilterDialog(type, ((Building_Storage)__instance).settings.filter));
                     },
                     groupKey = 987767553
 
                 };
             }
+        }
+
+        private static string GetType(string defName)
+        {
+            string s = defName.ToLower();
+            if (s.Contains("shelf"))
+            {
+                return "shelf";
+            }
+            if (s.Contains("clothing"))
+            {
+                return "Apparel_Management";
+            }
+            return "Zone_Stockpile";
         }
     }
 
@@ -257,7 +264,7 @@ namespace SaveStorageSettings
             {
                 Outfit outfit = Current.Game.outfitDatabase.MakeNewOutfit();
                 SetSelectedOutfit(__instance, outfit);
-                
+
                 Find.WindowStack.Add(new LoadFilterDialog("Apparel_Management", outfit.filter));
             }
 
