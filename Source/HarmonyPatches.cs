@@ -38,124 +38,110 @@ namespace SaveStorageSettings
         }
     }
 
-    [HarmonyPatch(typeof(HealthCardUtility), "DrawHealthSummary")]
-    static class Patch_HealthCardUtility_DrawHealthSummary
-    {
-        public static long LastCallTime = 0;
-
-        [HarmonyPriority(Priority.First)]
-        static void Prefix()
-        {
-            LastCallTime = DateTime.Now.Ticks;
-        }
-    }
-
     [HarmonyPatch(typeof(Pawn), "GetGizmos")]
     static class Patch_Pawn_GetGizmos
     {
-        const long TENTH_SECOND = TimeSpan.TicksPerSecond / 10;
         static FieldInfo OnOperationTab = null;
         static Patch_Pawn_GetGizmos()
         {
             OnOperationTab = typeof(HealthCardUtility).GetField("onOperationTab", BindingFlags.Static | BindingFlags.NonPublic);
         }
-        static void Postfix(Pawn __instance, ref IEnumerable<Gizmo> __result)
+        static IEnumerable<Gizmo> Postfix(IEnumerable<Gizmo> __result, Pawn __instance)
         {
+            foreach (var aGizmo in __result)
+            {
+                yield return aGizmo;
+            }
+
             if (!(bool)OnOperationTab.GetValue(null))
-                return;
+                yield break;
 
             if (!__instance.IsColonist && !__instance.IsPrisoner)
-                return;
-            
-            if (DateTime.Now.Ticks - Patch_HealthCardUtility_DrawHealthSummary.LastCallTime < TENTH_SECOND)
+                yield break;
+
+            string type = "OperationHuman";
+            if (__instance.RaceProps.Animal)
+                type = "OperationAnimal";
+
+            yield return new Command_Action
             {
-                string type = "OperationHuman";
-                if (__instance.RaceProps.Animal)
-                    type = "OperationAnimal";
+                icon = HarmonyPatches.SaveTexture,
+                defaultLabel = "SaveStorageSettings.SaveOperations".Translate(),
+                defaultDesc = "SaveStorageSettings.SaveOperations".Translate(),
+                activateSound = SoundDef.Named("Click"),
+                action = delegate {
+                    Find.WindowStack.Add(new SaveOperationDialog(type, __instance));
+                },
+                groupKey = 987764552
+            };
 
-                List<Gizmo> gizmos = new List<Gizmo>(__result)
+            yield return new Command_Action
+            {
+                icon = HarmonyPatches.AppendTexture,
+                defaultLabel = "SaveStorageSettings.LoadOperations".Translate(),
+                defaultDesc = "SaveStorageSettings.LoadOperations".Translate(),
+                activateSound = SoundDef.Named("Click"),
+                action = delegate
                 {
-                    new Command_Action
-                    {
-                        icon = HarmonyPatches.SaveTexture,
-                        defaultLabel = "SaveStorageSettings.SaveOperations".Translate(),
-                        defaultDesc = "SaveStorageSettings.SaveOperations".Translate(),
-                        activateSound = SoundDef.Named("Click"),
-                        action = delegate {
-                            Find.WindowStack.Add(new SaveOperationDialog(type, __instance));
-                        },
-                        groupKey = 987764552
-                    },
-
-                    new Command_Action
-                    {
-                        icon = HarmonyPatches.AppendTexture,
-                        defaultLabel = "SaveStorageSettings.LoadOperations".Translate(),
-                        defaultDesc = "SaveStorageSettings.LoadOperations".Translate(),
-                        activateSound = SoundDef.Named("Click"),
-                        action = delegate {
-                            Find.WindowStack.Add(new LoadOperationDialog(__instance, type));
-                        },
-                        groupKey = 987764553
-                    },
-                };
-
-                __result = gizmos;
-            }
+                    Find.WindowStack.Add(new LoadOperationDialog(__instance, type));
+                },
+                groupKey = 987764553
+            };
         }
     }
 
     [HarmonyPatch(typeof(Building), "GetGizmos")]
     static class Patch_Building_GetGizmos
     {
-        static void Postfix(Building __instance, ref IEnumerable<Gizmo> __result)
+        static IEnumerable<Gizmo> Postfix(IEnumerable<Gizmo> __result, Building __instance)
         {
+            foreach (var aGizmo in __result)
+            {
+                yield return aGizmo;
+            }
+
             if (__instance.def.IsWorkTable)
             {
                 string type = GetType(__instance.def.defName);
                 if (type == null)
-                    return;
+                    yield break;
 
-                List<Gizmo> gizmos = new List<Gizmo>(__result)
+                yield return new Command_Action
                 {
-                    new Command_Action
-                    {
-                        icon = HarmonyPatches.SaveTexture,
-                        defaultLabel = "SaveStorageSettings.SaveBills".Translate(),
-                        defaultDesc = "SaveStorageSettings.SaveBillsDesc".Translate(),
-                        activateSound = SoundDef.Named("Click"),
-                        action = delegate {
-                            Find.WindowStack.Add(new SaveCraftingDialog(type, ((Building_WorkTable)__instance).billStack));
-                        },
-                        groupKey = 987767552
+                    icon = HarmonyPatches.SaveTexture,
+                    defaultLabel = "SaveStorageSettings.SaveBills".Translate(),
+                    defaultDesc = "SaveStorageSettings.SaveBillsDesc".Translate(),
+                    activateSound = SoundDef.Named("Click"),
+                    action = delegate {
+                        Find.WindowStack.Add(new SaveCraftingDialog(type, ((Building_WorkTable)__instance).billStack));
                     },
-
-                    new Command_Action
-                    {
-                        icon = HarmonyPatches.AppendTexture,
-                        defaultLabel = "SaveStorageSettings.AppendBills".Translate(),
-                        defaultDesc = "SaveStorageSettings.AppendBillsDesc".Translate(),
-                        activateSound = SoundDef.Named("Click"),
-                        action = delegate {
-                            Find.WindowStack.Add(new LoadCraftingDialog(type, ((Building_WorkTable)__instance).billStack, LoadCraftingDialog.LoadType.Append));
-                        },
-                        groupKey = 987767553
-                    },
-
-                    new Command_Action
-                    {
-                        icon = HarmonyPatches.LoadTexture,
-                        defaultLabel = "SaveStorageSettings.LoadBills".Translate(),
-                        defaultDesc = "SaveStorageSettings.LoadBillsDesc".Translate(),
-                        activateSound = SoundDef.Named("Click"),
-                        action = delegate {
-                            Find.WindowStack.Add(new LoadCraftingDialog(type, ((Building_WorkTable)__instance).billStack, LoadCraftingDialog.LoadType.Replace));
-                        },
-                        groupKey = 987767554
-                    }
+                    groupKey = 987767552
                 };
 
-                __result = gizmos;
+                yield return new Command_Action
+                {
+                    icon = HarmonyPatches.AppendTexture,
+                    defaultLabel = "SaveStorageSettings.AppendBills".Translate(),
+                    defaultDesc = "SaveStorageSettings.AppendBillsDesc".Translate(),
+                    activateSound = SoundDef.Named("Click"),
+                    action = delegate {
+                        Find.WindowStack.Add(new LoadCraftingDialog(type, ((Building_WorkTable)__instance).billStack, LoadCraftingDialog.LoadType.Append));
+                    },
+                    groupKey = 987767553
+                };
+
+                yield return new Command_Action
+                {
+                    icon = HarmonyPatches.LoadTexture,
+                    defaultLabel = "SaveStorageSettings.LoadBills".Translate(),
+                    defaultDesc = "SaveStorageSettings.LoadBillsDesc".Translate(),
+                    activateSound = SoundDef.Named("Click"),
+                    action = delegate
+                    {
+                        Find.WindowStack.Add(new LoadCraftingDialog(type, ((Building_WorkTable)__instance).billStack, LoadCraftingDialog.LoadType.Replace));
+                    },
+                    groupKey = 987767554
+                };
             }
         }
 
@@ -186,38 +172,40 @@ namespace SaveStorageSettings
     [HarmonyPatch(typeof(Building_Storage), "GetGizmos")]
     static class Patch_BuildingStorage_GetGizmos
     {
-        static void Postfix(Building __instance, ref IEnumerable<Gizmo> __result)
+        static IEnumerable<Gizmo> Postfix(IEnumerable<Gizmo> __result, Building __instance)
         {
+            foreach (var aGizmo in __result)
+            {
+                yield return aGizmo;
+            }
+
             if (__instance.def.defName.Equals("Shelf"))
             {
-                List<Gizmo> gizmos = new List<Gizmo>(__result)
+                yield return new Command_Action
+                {
+                    icon = HarmonyPatches.SaveTexture,
+                    defaultLabel = "SaveStorageSettings.SaveZoneSettings".Translate(),
+                    defaultDesc = "SaveStorageSettings.SaveZoneSettingsDesc".Translate(),
+                    activateSound = SoundDef.Named("Click"),
+                    action = delegate {
+                        Find.WindowStack.Add(new SaveFilterDialog("shelf", ((Building_Storage)__instance).settings.filter));
+                    },
+                    groupKey = 987767552
+                };
+
+                yield return new Command_Action
+                {
+                    icon = HarmonyPatches.LoadTexture,
+                    defaultLabel = "SaveStorageSettings.LoadZoneSettings".Translate(),
+                    defaultDesc = "SaveStorageSettings.LoadZoneSettingsDesc".Translate(),
+                    activateSound = SoundDef.Named("Click"),
+                    action = delegate
                     {
-                        new Command_Action
-                        {
-                            icon = HarmonyPatches.SaveTexture,
-                            defaultLabel = "SaveStorageSettings.SaveZoneSettings".Translate(),
-                            defaultDesc = "SaveStorageSettings.SaveZoneSettingsDesc".Translate(),
-                            activateSound = SoundDef.Named("Click"),
-                            action = delegate {
-                                Find.WindowStack.Add(new SaveFilterDialog("shelf", ((Building_Storage)__instance).settings.filter));
-                            },
-                            groupKey = 987767552
-                        },
+                        Find.WindowStack.Add(new LoadFilterDialog("shelf", ((Building_Storage)__instance).settings.filter));
+                    },
+                    groupKey = 987767553
 
-                        new Command_Action
-                        {
-                            icon = HarmonyPatches.LoadTexture,
-                            defaultLabel = "SaveStorageSettings.LoadZoneSettings".Translate(),
-                            defaultDesc = "SaveStorageSettings.LoadZoneSettingsDesc".Translate(),
-                            activateSound = SoundDef.Named("Click"),
-                            action = delegate {
-                                Find.WindowStack.Add(new LoadFilterDialog("shelf", ((Building_Storage)__instance).settings.filter));
-                            },
-                            groupKey = 987767553
-                        }
-                    };
-
-                __result = gizmos;
+                };
             }
         }
     }
@@ -225,9 +213,38 @@ namespace SaveStorageSettings
     [HarmonyPatch(typeof(Zone_Stockpile), "GetGizmos")]
     static class Patch_Zone_Stockpile_GetGizmos
     {
-        static void Postfix(Zone_Stockpile __instance, ref IEnumerable<Gizmo> __result)
+        static IEnumerable<Gizmo> Postfix(IEnumerable<Gizmo> __result, Zone_Stockpile __instance)
         {
-            __result = GizmoUtil.AddSaveLoadGizmos(__result, "Zone_Stockpile", __instance.settings.filter);
+            foreach (var aGizmo in __result)
+            {
+                yield return aGizmo;
+            }
+
+            yield return new Command_Action
+            {
+                icon = HarmonyPatches.SaveTexture,
+                defaultLabel = "SaveStorageSettings.SaveZoneSettings".Translate(),
+                defaultDesc = "SaveStorageSettings.SaveZoneSettingsDesc".Translate(),
+                activateSound = SoundDef.Named("Click"),
+                action = delegate
+                {
+                    Find.WindowStack.Add(new SaveFilterDialog("Zone_Stockpile", __instance.settings.filter));
+                },
+                groupKey = 987767552
+            };
+
+            yield return new Command_Action
+            {
+                icon = HarmonyPatches.LoadTexture,
+                defaultLabel = "SaveStorageSettings.LoadZoneSettings".Translate(),
+                defaultDesc = "SaveStorageSettings.LoadZoneSettingsDesc".Translate(),
+                activateSound = SoundDef.Named("Click"),
+                action = delegate
+                {
+                    Find.WindowStack.Add(new LoadFilterDialog("Zone_Stockpile", __instance.settings.filter));
+                },
+                groupKey = 987767553
+            };
         }
     }
 
