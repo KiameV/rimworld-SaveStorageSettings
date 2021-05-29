@@ -103,4 +103,30 @@ namespace SaveStorageSettings.Dialog
             base.Close();
         }
     }
+
+    class SaveFoodRestrictionDialog : FileListDialog
+    {
+        private readonly FoodRestriction FoodRestriction;
+
+        internal SaveFoodRestrictionDialog(string type, FoodRestriction foodRestriction) : base(type)
+        {
+            this.FoodRestriction = foodRestriction;
+            this.interactButLabel = "OverwriteButton".Translate();
+        }
+
+        protected override bool ShouldDoTypeInField
+        {
+            get
+            {
+                return true;
+            }
+        }
+
+        protected override void DoFileInteraction(FileInfo fi)
+        {
+            IOUtil.SaveFoodRestrictionSettings(this.FoodRestriction, fi);
+            base.Close();
+        }
+    }
 }
+

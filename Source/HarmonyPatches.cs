@@ -339,4 +339,47 @@ namespace SaveStorageSettings
             typeof(Dialog_ManageDrugPolicies).GetProperty("SelectedPolicy", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.GetProperty).SetValue(dialog, selectedPolicy, null);
         }
     }
+
+    [HarmonyPatch(typeof(Dialog_ManageFoodRestrictions), "DoWindowContents")]
+    static class Patch_Dialog_ManageFoodRestrictions
+    {
+        static void Postfix(Dialog_ManageFoodRestrictions __instance, Rect inRect)
+        {
+            float x = 500;
+            if (Widgets.ButtonText(new Rect(x, 0, 150f, 35f), "SaveStorageSettings.LoadAsNew".Translate(), true, false, true))
+            {
+                FoodRestriction restriction = Current.Game.foodRestrictionDatabase.MakeNewFoodRestriction();
+                SetFoodRestriction(__instance, restriction);
+
+                Find.WindowStack.Add(new LoadFoodRestrictionDialog("FoodRestriction", restriction));
+            }
+
+            FoodRestriction selected = GetFoodRestriction(__instance);
+            if (selected != null)
+            {
+                Text.Font = GameFont.Small;
+                if (Widgets.ButtonText(new Rect(x, 50f, 72, 35f), "LoadGameButton".Translate(), true, false, true))
+                {
+                    string label = selected.label;
+                    Find.WindowStack.Add(new LoadFoodRestrictionDialog("FoodRestriction", selected));
+                    selected.label = label;
+                }
+                x += 77;
+                if (Widgets.ButtonText(new Rect(x, 50f, 73, 35f), "SaveGameButton".Translate(), true, false, true))
+                {
+                    Find.WindowStack.Add(new SaveFoodRestrictionDialog("FoodRestriction", selected));
+                }
+            }
+        }
+
+        private static FoodRestriction GetFoodRestriction(Dialog_ManageFoodRestrictions dialog)
+        {
+            return (FoodRestriction)typeof(Dialog_ManageFoodRestrictions).GetProperty("SelectedFoodRestriction", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.GetProperty).GetValue(dialog, null);
+        }
+
+        private static void SetFoodRestriction(Dialog_ManageFoodRestrictions dialog, FoodRestriction selectedRestriction)
+        {
+            typeof(Dialog_ManageFoodRestrictions).GetProperty("SelectedFoodRestriction", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.GetProperty).SetValue(dialog, selectedRestriction, null);
+        }
+    }
 }

@@ -217,6 +217,51 @@ namespace SaveStorageSettings
             }
         }
 
+        internal static void LoadFoodRestriction(FoodRestriction fr, FileInfo fi)
+        {
+            try
+            {
+                if (fi.Exists)
+                {
+                    // Load Data
+                    using (StreamReader sr = new StreamReader(fi.FullName))
+                    {
+                        string[] kv = null;
+                        if (sr.EndOfStream ||
+                            !ReadField(sr, out kv))
+                        {
+                            throw new Exception("Trying to read from an empty file");
+                        }
+
+                        if (kv != null && "1".Equals(kv[1]))
+                        {
+                            while (!sr.EndOfStream)
+                            {
+                                if (ReadField(sr, out kv))
+                                {
+                                    switch (kv[0])
+                                    {
+                                        case "name":
+                                            fr.label = kv[1];
+                                            ReadFiltersFromFile(fr.filter, sr);
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            throw new Exception("Unsupported version: " + kv[1]);
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                LogException("Problem loading storage settings file '" + fi.Name + "'.", e);
+            }
+        }
+
         static void LogException(string msg, Exception e)
         {
             Log.Warning(msg + Environment.NewLine + e.GetType().Name + " " + e.Message + " " + e.StackTrace);
@@ -372,6 +417,29 @@ namespace SaveStorageSettings
                             WriteField(sw, "takeToInventoryTempBuffer", e.takeToInventoryTempBuffer);
                             WriteField(sw, BREAK, BREAK);
                         }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                LogException("Problem saving storage settings file '" + fi.Name + "'.", e);
+                return false;
+            }
+            return true;
+        }
+        public static bool SaveFoodRestrictionSettings(FoodRestriction fr, FileInfo fi)
+        {
+            try
+            {
+                // Write Data
+                using (FileStream fileStream = File.Open(fi.FullName, FileMode.Create, FileAccess.Write))
+                {
+                    using (StreamWriter sw = new StreamWriter(fileStream))
+                    {
+                        WriteField(sw, "Version", "1");
+
+                        WriteField(sw, "name", fr.label);
+                        WriteFiltersToFile(fr.filter, sw);
                     }
                 }
             }

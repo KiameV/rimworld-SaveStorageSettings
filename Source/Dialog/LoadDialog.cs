@@ -151,4 +151,29 @@ namespace SaveStorageSettings.Dialog
             base.Close();
         }
     }
+
+    class LoadFoodRestrictionDialog : FileListDialog
+    {
+        private readonly FoodRestriction FoodRestriction;
+
+        internal LoadFoodRestrictionDialog(string storageTypeName, FoodRestriction foodRestriction) : base(storageTypeName)
+        {
+            this.FoodRestriction = foodRestriction;
+            this.interactButLabel = "LoadGameButton".Translate();
+        }
+
+        protected override bool ShouldDoTypeInField
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        protected override void DoFileInteraction(FileInfo fi)
+        {
+            IOUtil.LoadFoodRestriction(this.FoodRestriction, fi);
+            base.Close();
+        }
+    }
 }
