@@ -173,6 +173,15 @@ namespace SaveStorageSettings
             if (__instance is Building_Storage)
             {
                 string type = GetType(__instance.def.defName);
+                string dn = __instance.def.defName;
+                if (dn == "ChangeDresser")
+                {
+                    type = "Apparel_Management";
+                }
+                else if (dn == "WeaponStorage")
+                {
+                    type = "Weapon_Management";
+                }
 
                 yield return new Command_Action
                 {
