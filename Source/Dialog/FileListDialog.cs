@@ -122,14 +122,11 @@ namespace RimWorld
                 if (Widgets.ButtonImage(rect5, HarmonyPatches.DeleteXTexture))
                 {
                     FileInfo localFile = current;
-                    Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("ConfirmDelete".Translate(new object[]
-                    {
-                        localFile.Name
-                    }), delegate
+                    Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("ConfirmDelete".Translate(localFile.Name), delegate
                     {
                         localFile.Delete();
-                        this.ReloadFiles();
-                    }, true, null));
+                        ReloadFiles();
+                    }, destructive: true));
                 }
                 TooltipHandler.TipRegion(rect5, "DeleteThisSavegame".Translate());
                 GUI.EndGroup();
