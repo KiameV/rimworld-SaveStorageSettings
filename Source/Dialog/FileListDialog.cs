@@ -1,4 +1,6 @@
-﻿using SaveStorageSettings;
+﻿using RimWorld;
+using SaveStorageSettings;
+using SaveStorageSettings.Dialog;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,7 +8,7 @@ using System.Reflection;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace SaveStorageSettings.Dialog
 {
     public abstract class FileListDialog : Window
     {
@@ -86,7 +88,9 @@ namespace RimWorld
             float num = vector.y + 3f;
             float height = (float)this.files.Count * num;
             Rect viewRect = new Rect(0f, 0f, inRect.width - 16f, height);
-            Rect outRect = new Rect(inRect.AtZero());
+            Rect outRect = new Rect(0f, 0f, inRect.width, inRect.height);
+            if (this is SaveFilterDialog)
+                outRect.y -= 75f;
             outRect.height -= this.bottomAreaHeight;
             Widgets.BeginScrollView(outRect, ref this.scrollPosition, viewRect, true);
             float num2 = 0f;
