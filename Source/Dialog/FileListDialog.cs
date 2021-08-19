@@ -88,9 +88,9 @@ namespace SaveStorageSettings.Dialog
             float num = vector.y + 3f;
             float height = (float)this.files.Count * num;
             Rect viewRect = new Rect(0f, 0f, inRect.width - 16f, height);
-            Rect outRect = new Rect(0f, 0f, inRect.width, inRect.height);
+            Rect outRect = new Rect(inRect.x, inRect.y, inRect.width, inRect.height);
             if (this is SaveFilterDialog)
-                outRect.y -= 75f;
+                outRect.height -= 75f;
             outRect.height -= this.bottomAreaHeight;
             Widgets.BeginScrollView(outRect, ref this.scrollPosition, viewRect, true);
             float num2 = 0f;

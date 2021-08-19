@@ -217,6 +217,46 @@ namespace SaveStorageSettings
         }
     }
 
+    [HarmonyPatch(typeof(CompBiosculpterPod), "CompGetGizmosExtra")]
+    static class Patch_CompBiosculpterPod_CompGetGizmosExtra
+    {
+        static IEnumerable<Gizmo> Postfix(IEnumerable<Gizmo> __result, CompBiosculpterPod __instance)
+        {
+            foreach (var aGizmo in __result)
+            {
+                yield return aGizmo;
+            }
+
+            yield return new Command_Action
+            {
+                icon = HarmonyPatches.SaveTexture,
+                defaultLabel = "SaveStorageSettings.SaveZoneSettings".Translate(),
+                defaultDesc = "SaveStorageSettings.SaveZoneSettingsDesc".Translate(),
+                activateSound = SoundDef.Named("Click"),
+                action = delegate
+                {
+                    var s = (StorageSettings)__instance.GetType().GetField("allowedNutritionSettings", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(__instance);
+                    Find.WindowStack.Add(new SaveFilterDialog("CompBiosculpterPod", s.filter));
+                },
+                groupKey = 987767552
+            };
+
+            yield return new Command_Action
+            {
+                icon = HarmonyPatches.LoadTexture,
+                defaultLabel = "SaveStorageSettings.LoadZoneSettings".Translate(),
+                defaultDesc = "SaveStorageSettings.LoadZoneSettingsDesc".Translate(),
+                activateSound = SoundDef.Named("Click"),
+                action = delegate
+                {
+                    var s = (StorageSettings)__instance.GetType().GetField("allowedNutritionSettings", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(__instance);
+                    Find.WindowStack.Add(new LoadFilterDialog("CompBiosculpterPod", s.filter));
+                },
+                groupKey = 987767553
+            };
+        }
+    }
+
     [HarmonyPatch(typeof(Zone_Stockpile), "GetGizmos")]
     static class Patch_Zone_Stockpile_GetGizmos
     {

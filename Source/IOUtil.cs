@@ -651,40 +651,25 @@ namespace SaveStorageSettings
                                 break;
                             case "part":
                                 var pv = kv[1].Split(':');
-                                if (bill.recipe.defName.StartsWith("Remove"))
+                                bill.Part = null;
+                                string partToFind = pv[0];
+                                foreach (BodyPartRecord part in pawn.health.hediffSet.GetNotMissingParts(BodyPartHeight.Undefined, BodyPartDepth.Undefined, null, null))
                                 {
-                                    bill.Part = null;
-                                    string partToFind = pv[0];
-                                    foreach (BodyPartRecord part in pawn.health.hediffSet.GetNotMissingParts(BodyPartHeight.Undefined, BodyPartDepth.Undefined, null, null))
+                                    if (part.Label.Equals(partToFind))
                                     {
-                                        if (part.Label.Equals(partToFind))
-                                        {
-                                            bill.Part = part;
-                                            break;
-                                        }
-                                    }
-                                    if (bill.Part == null)
-                                    {
-                                        Log.Warning("Pawn [" + pawn.Name.ToStringShort + "] does not have body part [" + partToFind + "] to have removed.");
-                                        return false;
+                                        bill.Part = part;
+                                        break;
                                     }
                                 }
-                                else if (bill.recipe.defName.StartsWith("Install"))
+                                if (bill.Part == null)
                                 {
-                                    string partToFind = pv[1];
-                                    foreach (BodyPartRecord p in pawn.RaceProps.body.AllParts)
-                                    {
-                                        if (p.def.defName.Equals(partToFind))
-                                        {
-                                            bill.Part = p;
-                                            break;
-                                        }
-                                    }
-                                    if (bill.Part == null)
-                                    {
+                                    if (bill.recipe.defName.StartsWith("Remove"))
+                                        Log.Warning("Pawn [" + pawn.Name.ToStringShort + "] does not have body part [" + partToFind + "] to have removed.");
+                                    else if (bill.recipe.defName.StartsWith("Install"))
+                                        Log.Warning("Unknown body part to install part to [" + partToFind + "].");
+                                    else
                                         Log.Warning("Unknown body part [" + partToFind + "].");
-                                        return false;
-                                    }
+                                    return false;
                                 }
                                 break;
                         }
